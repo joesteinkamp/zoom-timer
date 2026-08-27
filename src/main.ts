@@ -8,6 +8,7 @@
  * previous run's teardown close the new run's share.
  */
 import * as audio from './audio';
+import * as consent from './consent';
 import * as indicator from './indicator';
 import * as share from './share';
 import { Timer } from './timer';
@@ -54,6 +55,11 @@ async function boot(): Promise<void> {
       if (timer.extend(ms)) void indicator.extend(Math.round(ms / 1000));
     },
     onPromptShare: () => void promptShareWithSound(),
+    onAcknowledgeDisclosure: () => {
+      consent.acknowledge();
+      paint();
+    },
+    onPreviewChime: () => void previewChime(),
   });
 
   timer.onChange(() => paint());
@@ -92,6 +98,9 @@ async function boot(): Promise<void> {
 
 async function startRun(durationMs: number): Promise<void> {
   if (timer.isBusy() || durationMs <= 0) return;
+  // The UI hides the chooser until the notice is answered; this is the guard
+  // on the path itself, for the moment between boot and config() resolving.
+  if (disclosureNeeded()) return;
 
   // Tear down anything the previous run left behind before re-arming.
   audio.stop();
@@ -106,6 +115,21 @@ async function startRun(durationMs: number): Promise<void> {
   timer.start(durationMs);
   await startIndicator(durationMs);
   paint();
+}
+
+/** Play the chime locally. Deliberately never opens a share. */
+async function previewChime(): Promise<void> {
+  await audio.unlock().catch(() => undefined);
+  audio.schedule(0, () => undefined);
+}
+
+/**
+ * True while an audio share is possible and the user has not yet been told
+ * what one does. Not asked on clients that cannot share audio: a warning
+ * about something that cannot happen is just noise.
+ */
+function disclosureNeeded(): boolean {
+  return mayShareAudio(env) && !consent.isAcknowledged();
 }
 
 async function startIndicator(remainingMs: number): Promise<void> {
@@ -171,6 +195,8 @@ function paint(): void {
     ? null
     : share.foreseenProblem();
 
+  const atRest = snapshot.state === 'idle' || snapshot.state === 'finished';
+
   const view: ViewModel = {
     snapshot,
     sharedAudioAvailable: mayShareAudio(env) && advisory === null,
@@ -179,6 +205,7 @@ function paint(): void {
     advisory,
     advisoryHasPrompt: Boolean(advisory && advisory.includes('Share sound')),
     lastOutcome,
+    needsAudioDisclosure: atRest && disclosureNeeded(),
     contextNote: contextNote(),
   };
   render(view);

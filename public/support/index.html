@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Support — Meeting Timer</title>
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="stylesheet" href="/page.css" />
+  </head>
+  <body>
+    <main class="page">
+      <nav class="crumbs"><a href="/docs/">Meeting Timer</a></nav>
+
+      <h1>Support</h1>
+      <p class="lead">Something not working? Start here — most of it comes down to which Zoom client
+      you are on, or who else is sharing.</p>
+
+      <h2>Common problems</h2>
+      <div class="wrap-x">
+        <table>
+          <tr><th>What you see</th><th>What it means</th></tr>
+          <tr>
+            <td>"This client cannot share audio, so only you will hear the chime."</td>
+            <td>You are on mobile, on the web client, or on a desktop client older than 5.12.6.
+            Audio sharing is a desktop feature. Update the desktop client, or use the countdown
+            badge alone.</td>
+          </tr>
+          <tr>
+            <td>Participants hear nothing at zero, and no message explained why</td>
+            <td>Check whether computer audio sharing is disabled for your account or meeting — an
+            administrator can turn it off centrally.</td>
+          </tr>
+          <tr>
+            <td>"Someone else is sharing, so only you may hear the chime."</td>
+            <td>Zoom gives the audio channel to whoever is sharing. Ask the host to enable
+            <em>multiple participants can share simultaneously</em>, or run the timer while nobody
+            is sharing.</td>
+          </tr>
+          <tr>
+            <td>No countdown appears next to your name</td>
+            <td>The badge needs desktop client 5.17.5 or later. The timer and chime still work
+            without it.</td>
+          </tr>
+          <tr>
+            <td>The panel is blank</td>
+            <td>Close and reopen the app from the Apps panel. If it persists, restart the Zoom
+            client — the app is a webview and occasionally needs one.</td>
+          </tr>
+          <tr>
+            <td>The chime is quiet for other participants</td>
+            <td>Shared computer audio carries your system volume. Turn your own volume up before
+            the timer ends.</td>
+          </tr>
+        </table>
+      </div>
+
+      <h2>Requirements</h2>
+      <ul>
+        <li>Zoom desktop client for Windows or macOS.</li>
+        <li>5.12.6 or later for the chime; 5.17.5 or later for the shared countdown badge.</li>
+        <li>Permission to share audio in the meeting — in a webinar, that means host, co-host, or
+        panelist.</li>
+      </ul>
+
+      <h2>Reporting a problem</h2>
+      <p><a href="https://github.com/joesteinkamp/zoom-timer/issues">Open an issue on GitHub</a>.
+      What helps most:</p>
+      <ul>
+        <li>Your Zoom client version and operating system.</li>
+        <li>Whether you were in a meeting or a webinar, and your role in it.</li>
+        <li>Whether anyone was sharing a screen at the time.</li>
+        <li>Exactly what the app said, if it showed a message.</li>
+      </ul>
+      <p>Issues are read and answered by the developer. There is no support desk and no ticket
+      number — it is a small free app.</p>
+
+      <footer class="foot">
+        <a href="/docs/">Documentation</a> · <a href="/privacy/">Privacy Policy</a> ·
+        <a href="/terms/">Terms of Use</a>
+      </footer>
+    </main>
+  </body>
+</html>

@@ -1,5 +1,5 @@
 /**
- * Shared OAuth helpers for the two install-flow functions.
+ * Shared OAuth helpers for the install-flow functions.
  *
  * Vercel functions are stateless, so the `state` and PKCE verifier that must
  * survive between /api/install and /api/auth travel in a signed, HttpOnly
@@ -17,6 +17,13 @@ export interface OAuthConfig {
   clientSecret: string;
   redirectUrl: string;
   sessionSecret: string;
+  /**
+   * Optional space-separated scopes. Left unset, Zoom grants whatever the
+   * registration was configured with -- which is the safe default, because
+   * asking for a scope the app was never granted fails the whole authorize
+   * with error 4700 rather than degrading.
+   */
+  scopes: string | null;
 }
 
 export function readConfig(): OAuthConfig | null {
@@ -25,7 +32,7 @@ export function readConfig(): OAuthConfig | null {
   const redirectUrl = process.env.ZM_REDIRECT_URL;
   const sessionSecret = process.env.SESSION_SECRET;
   if (!clientId || !clientSecret || !redirectUrl || !sessionSecret) return null;
-  return { clientId, clientSecret, redirectUrl, sessionSecret };
+  return { clientId, clientSecret, redirectUrl, sessionSecret, scopes: process.env.ZM_SCOPES || null };
 }
 
 export function base64url(input: Buffer | string): string {
@@ -93,19 +100,52 @@ export function newState(): string {
   return base64url(randomBytes(24));
 }
 
-export function problem(message: string, status = 400): Response {
-  return new Response(message, {
+/**
+ * A failure a person can act on.
+ *
+ * This is the first thing a new user can see go wrong, so it is a real page
+ * rather than a line of text/plain. The stylesheet is a same-origin file
+ * because the Content-Security-Policy this app ships (`style-src 'self'`)
+ * refuses an inline <style> block -- including on its own error pages.
+ */
+export function problem(message: string, status = 400, retry = true): Response {
+  const body = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Meeting Timer — install problem</title>
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="stylesheet" href="/page.css" />
+  </head>
+  <body class="centred">
+    <main class="page narrow">
+      <h1>That didn't finish</h1>
+      <p class="lead">${escapeHtml(message)}</p>
+      ${retry ? '<p><a class="button" href="/api/install">Try installing again</a></p>' : ''}
+      <p class="fine">If it keeps happening, <a href="/support/">contact support</a>.</p>
+    </main>
+  </body>
+</html>
+`;
+  return new Response(body, {
     status,
-    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
   });
 }
 
-function sign(body: string, secret: string): string {
-  return createHmac('sha256', secret).update(body).digest('base64url');
+export function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string,
+  );
 }
 
 function safeEquals(a: string, b: string): boolean {
   const left = Buffer.from(a);
   const right = Buffer.from(b);
   return left.length === right.length && timingSafeEqual(left, right);
+}
+
+function sign(body: string, secret: string): string {
+  return createHmac('sha256', secret).update(body).digest('base64url');
 }

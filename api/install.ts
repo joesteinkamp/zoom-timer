@@ -17,7 +17,7 @@ export const config = { runtime: 'nodejs' };
 
 export default function handler(): Response {
   const settings = readConfig();
-  if (!settings) return problem('Server is missing Zoom OAuth environment variables.', 500);
+  if (!settings) return problem('Server is missing Zoom OAuth environment variables.', 500, false);
 
   const state = newState();
   const verifier = newVerifier();
@@ -29,6 +29,10 @@ export default function handler(): Response {
   url.searchParams.set('code_challenge', challengeFor(verifier));
   url.searchParams.set('code_challenge_method', 'S256');
   url.searchParams.set('state', state);
+  // Only sent when ZM_SCOPES is set. Zoom otherwise grants what the app
+  // registration was configured with; asking for a scope that was never
+  // granted fails the authorize outright rather than degrading.
+  if (settings.scopes) url.searchParams.set('scope', settings.scopes);
 
   const sealed = sealState({ state, verifier, exp: Date.now() + 600_000 }, settings.sessionSecret);
 

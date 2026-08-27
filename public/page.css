@@ -1,0 +1,114 @@
+/*
+ * Styling for the pages that are not the app: the four Marketplace URLs and
+ * the OAuth error page.
+ *
+ * A separate file rather than inline <style> blocks, because the
+ * Content-Security-Policy this app ships (`style-src 'self'`) refuses inline
+ * styles on every path it covers -- these pages included.
+ */
+:root {
+  --bg: #ffffff;
+  --surface: #f4f6f9;
+  --ink: #121a24;
+  --ink-soft: #55647a;
+  --line: #d8e0ea;
+  --accent: #1f5aa8;
+  --accent-ink: #ffffff;
+  --radius: 8px;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #10161e;
+    --surface: #19222d;
+    --ink: #e4ebf3;
+    --ink-soft: #94a3b5;
+    --line: #2a3644;
+    --accent: #4d8fd8;
+    --accent-ink: #0b1119;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body.centred { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 20px 72px;
+}
+
+.page.narrow { max-width: 460px; padding-bottom: 40px; }
+
+h1 {
+  font-size: 26px;
+  line-height: 1.2;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: 17px;
+  margin: 32px 0 8px;
+  letter-spacing: -0.005em;
+}
+
+.lead { color: var(--ink-soft); margin: 0 0 20px; }
+.updated { font-size: 13px; color: var(--ink-soft); margin: 0 0 28px; }
+.fine { font-size: 13px; color: var(--ink-soft); }
+
+p, li { max-width: 66ch; }
+ul { padding-left: 20px; }
+li { margin-bottom: 6px; }
+
+a { color: var(--accent); }
+
+.button {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.button:hover { filter: brightness(1.08); }
+a:focus-visible, .button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin: 20px 0;
+}
+
+.card p:last-child, .card ul:last-child { margin-bottom: 0; }
+
+table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 12px 0 20px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--ink-soft); font-weight: 600; }
+
+.wrap-x { overflow-x: auto; }
+
+nav.crumbs { font-size: 13px; margin-bottom: 24px; }
+nav.crumbs a { color: var(--ink-soft); }
+
+footer.foot {
+  margin-top: 48px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--ink-soft);
+}
