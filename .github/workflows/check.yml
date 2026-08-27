@@ -1,0 +1,27 @@
+name: check
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # The end-to-end run drives the real bundle in a real browser, so it
+      # needs one. --with-deps pulls the system libraries Chromium wants on a
+      # bare runner.
+      - run: npx playwright install --with-deps chromium
+
+      # typecheck + logic tests + end-to-end browser run.
+      - run: npm run check

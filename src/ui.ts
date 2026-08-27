@@ -22,6 +22,8 @@ export interface ViewModel {
   advisoryHasPrompt: boolean;
   /** Outcome text from the run that just fired. */
   lastOutcome: string | null;
+  /** Show the audio disclosure instead of the duration chooser. */
+  needsAudioDisclosure: boolean;
   contextNote: string;
 }
 
@@ -33,6 +35,8 @@ export interface Handlers {
   onReset(): void;
   onExtend(ms: number): void;
   onPromptShare(): void;
+  onAcknowledgeDisclosure(): void;
+  onPreviewChime(): void;
 }
 
 interface Nodes {
@@ -42,6 +46,7 @@ interface Nodes {
   caption: HTMLElement;
   controls: HTMLElement;
   chooser: HTMLElement;
+  disclosure: HTMLElement;
   presets: HTMLElement;
   customInput: HTMLInputElement;
   customStart: HTMLButtonElement;
@@ -111,12 +116,20 @@ export function mount(root: HTMLElement, h: Handlers): void {
     if (event.key === 'Enter') submitCustom();
   });
 
-  chooser.append(presets, customLabel, custom);
+  // Only you hear this one. Without it the sound cannot be heard without
+  // running a timer to zero in a live meeting.
+  const preview = el('button', 'link') as HTMLButtonElement;
+  preview.type = 'button';
+  preview.textContent = 'Preview chime — only you hear this';
+  preview.addEventListener('click', () => handlers?.onPreviewChime());
 
+  chooser.append(presets, customLabel, custom, preview);
+
+  const disclosure = buildDisclosure();
   const status = el('div', 'status');
 
-  root.append(masthead, readout, controls, chooser, el('div', 'spacer'), status);
-  nodes = { sub, readout, time, caption, controls, chooser, presets, customInput, customStart, status };
+  root.append(masthead, readout, controls, disclosure, chooser, el('div', 'spacer'), status);
+  nodes = { sub, readout, time, caption, controls, chooser, disclosure, presets, customInput, customStart, status };
 }
 
 export function render(view: ViewModel): void {
@@ -133,9 +146,12 @@ export function render(view: ViewModel): void {
   renderControls(view);
 
   // The chooser is always live in idle and finished, so starting a different
-  // duration never needs a dismissal step first.
-  const choosing = snapshot.state === 'idle' || snapshot.state === 'finished';
+  // duration never needs a dismissal step first -- unless the audio notice is
+  // still standing, which has to be answered before anything can share audio.
+  const choosing =
+    !view.needsAudioDisclosure && (snapshot.state === 'idle' || snapshot.state === 'finished');
   nodes.chooser.style.display = choosing ? 'flex' : 'none';
+  nodes.disclosure.style.display = view.needsAudioDisclosure ? 'flex' : 'none';
 
   renderStatus(view);
 }
@@ -216,6 +232,37 @@ function renderStatus(view: ViewModel): void {
   } else if (view.snapshot.state !== 'firing' && view.snapshot.state !== 'finished') {
     status.append(line(reachSummary(view), view.sharedAudioAvailable ? 'live' : undefined));
   }
+}
+
+/**
+ * The one-time notice. Built with the rest of the DOM and shown by display,
+ * because everything here is built once and updated in place.
+ */
+function buildDisclosure(): HTMLElement {
+  const panel = el('div', 'disclosure');
+
+  const heading = el('strong');
+  heading.textContent = 'Before your first timer';
+
+  const body = el('p');
+  body.textContent =
+    "When a timer ends, this app turns on Zoom's share computer audio so everyone hears the " +
+    'chime. For those few seconds, anything else playing on your computer is audible to the ' +
+    'meeting too. It switches off the moment the chime finishes.';
+
+  const accept = el('button', 'primary') as HTMLButtonElement;
+  accept.type = 'button';
+  accept.textContent = 'Got it';
+  accept.addEventListener('click', () => handlers?.onAcknowledgeDisclosure());
+
+  const more = el('a', 'fine-link') as HTMLAnchorElement;
+  more.href = '/privacy/';
+  more.target = '_blank';
+  more.rel = 'noreferrer';
+  more.textContent = 'What this app stores';
+
+  panel.append(heading, body, accept, more);
+  return panel;
 }
 
 function reachSummary(view: ViewModel): string {

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Meeting Timer — Documentation</title>
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="stylesheet" href="/page.css" />
+  </head>
+  <body>
+    <main class="page">
+      <h1>Meeting Timer</h1>
+      <p class="lead">A countdown for Zoom meetings that everyone can see, with a chime everyone
+      can hear.</p>
+
+      <h2>Installing</h2>
+      <p>Add Meeting Timer from the Zoom App Marketplace. After you approve the permissions, the app
+      opens in your Zoom client. It appears in the <strong>Apps</strong> panel during any meeting.</p>
+      <p>You need the Zoom <strong>desktop client</strong> on Windows or macOS. Version 5.17.5 or
+      later supports everything the app does; on 5.12.6 to 5.17.4 the chime works but the shared
+      countdown badge does not. Mobile and web clients can run the timer for you alone — Zoom does
+      not offer audio sharing or the countdown badge there.</p>
+
+      <h2>Running a timer</h2>
+      <ul>
+        <li>Open <strong>Apps</strong> in a meeting and choose Meeting Timer.</li>
+        <li>Pick one of the preset durations, or type your own — <code>7</code> for seven minutes,
+        <code>7:30</code>, <code>90s</code>, or <code>2m30s</code>.</li>
+        <li>While it runs you can pause, add a minute, or reset. Adding a minute extends the badge
+        everyone sees, too.</li>
+      </ul>
+
+      <h2>What other participants see and hear</h2>
+      <p>Two separate things happen, and they can succeed independently:</p>
+      <div class="wrap-x">
+        <table>
+          <tr><th>The countdown badge</th><td>A live countdown appears next to your name in every
+          participant's client, drawn by Zoom itself. It needs no screen share and no permission,
+          and it works whether or not the chime does.</td></tr>
+          <tr><th>The chime</th><td>At zero, the app turns on Zoom's <em>share computer audio</em>
+          for the length of the chime so the meeting can hear it, then turns it straight back off.</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <p><strong>What the audio notice is about.</strong> While the share is open — roughly two
+        and a half seconds — everything audible on your computer goes into the meeting, not only the
+        chime. A notification sound or a video playing in another window would be heard too. The app
+        shows you this once before your first countdown.</p>
+      </div>
+
+      <h2>When the chime won't be heard</h2>
+      <p>The app tells you which of these applies before you start a timer, so it is never a
+      surprise at zero. In all of them, the countdown badge still works.</p>
+      <div class="wrap-x">
+        <table>
+          <tr><th>Situation</th><th>What happens</th></tr>
+          <tr><td>You are already sharing your screen with computer sound on</td>
+              <td>The chime is already audible; the app leaves your share alone.</td></tr>
+          <tr><td>You are sharing your screen without sound</td>
+              <td>The app offers a one-click shortcut to restart the share with sound enabled.</td></tr>
+          <tr><td>Someone else is sharing</td>
+              <td>Zoom gives the audio channel to their share. You hear the chime locally; everyone
+              still sees the countdown. If your host has enabled <em>multiple participants can share
+              simultaneously</em>, this may not apply.</td></tr>
+          <tr><td>Your host or admin has disabled computer audio sharing</td>
+              <td>The chime plays for you only, and the app says so before you start.</td></tr>
+        </table>
+      </div>
+
+      <h2>Frequently asked</h2>
+      <p><strong>Can I use a different sound?</strong> Not yet. The app ships one chime, which is
+      the reason it exists — Zoom's own countdown can only play sounds from its built-in list.</p>
+      <p><strong>Does it record anything?</strong> No. The app has no access to meeting audio,
+      video, chat, or recordings, and stores nothing about you. See the
+      <a href="/privacy/">Privacy Policy</a>.</p>
+      <p><strong>Does the timer drift if I switch away?</strong> No. It works from a fixed end time
+      rather than counting down, so a backgrounded panel catches up the moment it wakes.</p>
+      <p><strong>Can other participants control it?</strong> No. Only you run the timer; everyone
+      else sees the countdown.</p>
+
+      <footer class="foot">
+        <a href="/support/">Support</a> · <a href="/privacy/">Privacy Policy</a> ·
+        <a href="/terms/">Terms of Use</a>
+      </footer>
+    </main>
+  </body>
+</html>

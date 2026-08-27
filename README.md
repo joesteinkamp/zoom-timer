@@ -32,6 +32,7 @@ sees zero, some don't hear it"* — never to nothing happening.
 
 ```
 src/timer.ts       State machine. Absolute endsAt + monotonic runId.
+src/consent.ts     The one-time audio disclosure, and its storage.
 src/audio.ts       Web Audio. Decodes the chime at boot, schedules on the audio clock.
 src/share.ts       shareComputerAudio, serialized; screen-share coexistence.
 src/indicator.ts   setDynamicIndicator lifecycle.
@@ -39,8 +40,12 @@ src/zoom.ts        SDK config, running context, capability detection.
 src/main.ts        Controller wiring the above together.
 api/install.ts     OAuth step 1 — PKCE challenge, signed cookie.
 api/auth.ts        OAuth step 2 — token exchange, deeplink.
-spike/             The M0 audio-share experiment.
-test/logic.test.ts Timer and parsing tests.
+api/deauthorize.ts Zoom's deauthorization webhook. Verified, and empty by design.
+public/            The four Marketplace URLs: /docs /support /privacy /terms.
+brand/             Listing icon, and the SVG it is generated from.
+docs/              Listing copy and the security questionnaire answers.
+spike/             The M0 audio-share experiment. Dev builds only.
+test/logic.test.ts Timer, parsing, and disclosure tests.
 ```
 
 ### Two invariants worth not breaking
@@ -70,9 +75,16 @@ user-managed. Then set:
 | OAuth Allow List | the same redirect URL |
 | Domain Allow List | your app host |
 | In-client features | enable every API listed in `CAPABILITIES` in `src/zoom.ts` |
+| Deauthorization endpoint | `https://<host>/api/deauthorize`, with its Secret Token in `ZM_WEBHOOK_SECRET_TOKEN` |
+| Privacy / Terms / Support / Documentation | `/privacy/`, `/terms/`, `/support/`, `/docs/` on your host |
 
 Runtime `config()` is a second gate, not the only one — both lists must agree
 or the call throws.
+
+Zoom will not publish an app without the deauthorization endpoint, and it
+validates the URL when you save it: it posts an `endpoint.url_validation`
+challenge that `api/deauthorize.ts` answers by signing the token back. Set
+`ZM_WEBHOOK_SECRET_TOKEN` *before* saving the URL, or the save fails.
 
 ### 2. Run it
 
@@ -91,10 +103,15 @@ fields; a reserved subdomain pays for itself in the first afternoon.
 
 ### 3. Deploy
 
-`vercel.json` carries the four security headers Zoom requires on the Home URL
-response — `Strict-Transport-Security`, `X-Content-Type-Options`,
-`Content-Security-Policy`, `Referrer-Policy`. **A response missing any of them
-is blocked from rendering** in the embedded browser. This is also why GitHub
+`vercel.json` carries the security headers Zoom requires on the Home URL
+response. **A response missing any of them is blocked from rendering** in the
+embedded browser, with no useful error. The e2e run asserts every one of them
+is present, so the set cannot regress quietly.
+
+One header is deliberately absent: `Cross-Origin-Embedder-Policy`. It is the
+one most likely to break an embedded webview, and that cannot be verified from
+outside the Zoom client — so if the client's own header check asks for it, add
+it there and confirm the panel still renders. This is also why GitHub
 Pages cannot host this app: it exposes no header configuration, and a
 `<meta http-equiv>` tag is not a response header.
 
@@ -109,7 +126,12 @@ Two Vercel defaults will cost you an afternoon if you miss them:
 
 ## The M0 experiment — do this first
 
-`/spike` is a guided two-step protocol for the one test that cannot be
+`/spike` builds in `npm run dev` and is **absent from production builds** — it
+opens an audio share and plays tones into whatever meeting it runs in, which is
+not something to leave reachable on a deployed app. To put it on a deployment
+for the M0 run, build with `INCLUDE_SPIKE=1`.
+
+It is a guided two-step protocol for the one test that cannot be
 automated. Open it **inside the Zoom client**, in a real meeting, with a
 second participant on the call:
 
@@ -140,20 +162,27 @@ npm run check   # typecheck + logic tests + end-to-end browser run
 Three layers, all passing:
 
 - **`npm run typecheck`** — `tsc --noEmit`.
-- **`npm test`** — 33 assertions over duration parsing and the full state
-  machine (start / pause / resume / extend / restart / reset / finish),
-  including specifically that a stale `runId` cannot finish or tear down a
-  current run.
+- **`npm test`** — assertions over duration parsing, the full state machine
+  (start / pause / resume / extend / restart / reset / finish) including
+  specifically that a stale `runId` cannot finish or tear down a current run,
+  and the audio disclosure, including that a blocked `localStorage` leaves the
+  answer holding for the session and asks again next time.
 - **`npm run e2e`** — serves the production bundle with the *exact* headers
   from `vercel.json` and drives the app in Chromium: a real 3-second timer
   through running → paused → firing → finished, then Restart, then starting a
   different duration straight from finished. It decodes the chime in a real
   browser and fails on any console error, CSP violation, or failed request.
 
+  It also checks the four Marketplace pages return 200 with the same headers,
+  that a production build contains no `/spike/`, and that the disclosure copy
+  still says what is shared and when it stops.
+
   Serving the real headers is the point. This is what caught an inline `style`
   attribute that our own `style-src 'self'` refuses — it would have rendered
   the spike page unstyled inside Zoom and looked like anything but a CSP
   problem. Set `SHOTS=./shots` to also write screenshots.
+
+  CI runs the same command on every push and pull request.
 
 **Not verified here, and unverifiable outside the Zoom client:** everything
 that touches the SDK — audio share, the dynamic indicator, running-context
@@ -172,4 +201,15 @@ of playback, so a long tail is a longer window of your system audio going into
 the meeting. Leading silence matters too — it delays the perceived fire and
 reads as timer drift.
 
-Replace the file and re-run the build to change the sound.
+Replace the file and re-run the build to change the sound. **Preview chime** in
+the panel plays it locally, without opening a share — the only way to hear it
+without running a timer to zero in a live meeting.
+
+## Before submitting
+
+`docs/marketplace-listing.md` and `docs/security-questionnaire.md` hold the
+listing copy and the questionnaire answers, both written against what the code
+actually does. What is still missing is everything that needs a real client:
+the M0 answer, the install walked end to end, Zoom's own header check, and the
+screenshots. The listing copy's claims about how the chime *sounds* are the
+ones M0 can invalidate.

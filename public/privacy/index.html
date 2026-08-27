@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Privacy Policy — Meeting Timer</title>
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="stylesheet" href="/page.css" />
+  </head>
+  <body>
+    <main class="page">
+      <nav class="crumbs"><a href="/docs/">Meeting Timer</a></nav>
+
+      <h1>Privacy Policy</h1>
+      <p class="lead">Meeting Timer is a countdown timer for Zoom meetings. It has no user
+      accounts, no database, and no analytics. This policy explains what that means in detail.</p>
+      <p class="updated">Last updated 27 August 2026</p>
+
+      <div class="card">
+        <p><strong>The short version.</strong> Meeting Timer does not store your personal data
+        anywhere. Nothing you do in the app is transmitted to us or to any third party. The only
+        information the app keeps is a countdown length saved in your own browser storage, which
+        never leaves your device.</p>
+      </div>
+
+      <h2>What the app reads while you use it</h2>
+      <p>When Meeting Timer is open in a Zoom meeting, it asks the Zoom Apps SDK for a small amount
+      of context. Every item below is held in memory for the length of your session and is never
+      written down, sent anywhere, or shared:</p>
+      <div class="wrap-x">
+        <table>
+          <tr><th>What</th><th>Why the app asks for it</th></tr>
+          <tr><td>Meeting topic</td><td>Labels the countdown badge, so participants see what the timer is for</td></tr>
+          <tr><td>Your role in the meeting</td><td>Zoom only allows panelists, co-hosts, and hosts to share audio in a webinar; the app checks before offering to</td></tr>
+          <tr><td>Your display name and participant ID</td><td>Distinguishes a screen share you started from one someone else started, so the app never closes a share that isn't its own</td></tr>
+          <tr><td>Zoom client version and running context</td><td>Detects which features this client supports, so unavailable ones are not offered</td></tr>
+        </table>
+      </div>
+
+      <h2>What the app stores on your device</h2>
+      <ul>
+        <li><strong>Your last countdown length</strong>, so the app can offer it again next time.</li>
+        <li><strong>Your acknowledgement of the audio notice</strong>, so you are shown it once
+        rather than every session.</li>
+      </ul>
+      <p>Both live in your browser's local storage inside the Zoom client, on your device only.
+      Clearing your Zoom app data or removing the app removes them. Neither is readable by us.</p>
+
+      <h2>Audio sharing</h2>
+      <p>When a countdown reaches zero, the app briefly turns on Zoom's <em>share computer audio</em>
+      so other participants can hear the chime. While that share is open — the length of the chime,
+      about two and a half seconds — <strong>all sound coming out of your computer is audible to the
+      meeting</strong>, not only the chime. The app opens the share immediately before the chime and
+      closes it as soon as playback ends.</p>
+      <p>The audio itself is handled entirely by Zoom. Meeting Timer does not record, receive,
+      store, or transmit any audio, and it never accesses your microphone or camera.</p>
+
+      <h2>Installation</h2>
+      <p>Installing the app runs a standard Zoom OAuth flow. During it:</p>
+      <ul>
+        <li>A short-lived cookie holds a random anti-forgery value for up to ten minutes. It is
+        signed, marked HttpOnly and Secure, contains no personal information, and is cleared as
+        soon as the install completes.</li>
+        <li>Zoom issues an access token, which is used once to ask Zoom for the link that opens the
+        app in your client, and is then discarded. It is never written to disk or to a database.</li>
+      </ul>
+
+      <h2>What we never do</h2>
+      <ul>
+        <li>No analytics, telemetry, tracking pixels, or advertising.</li>
+        <li>No cookies other than the ten-minute install cookie described above.</li>
+        <li>No selling, renting, or sharing of personal data — there is none to sell.</li>
+        <li>No access to meeting content: no recordings, transcripts, chat, participant lists, or
+        video.</li>
+      </ul>
+
+      <h2>Service providers</h2>
+      <p>The app's pages and its two installation functions are hosted on Vercel, which processes
+      standard web server request data such as IP address and user agent in order to serve the
+      page. Zoom operates the meeting and the client the app runs inside. No other third party is
+      involved.</p>
+
+      <h2>Retention, access, and deletion</h2>
+      <p>Because no personal data is collected or stored, there is nothing to retain and nothing to
+      export or erase on request. To remove the two values the app saved in your own browser, remove
+      the app from Zoom or clear your Zoom app data.</p>
+      <p>Removing the app also notifies us through Zoom's deauthorization webhook. That notification
+      is acknowledged and no data is deleted, because none was ever held.</p>
+
+      <h2>Children</h2>
+      <p>Meeting Timer is a workplace tool and is not directed at children under 13.</p>
+
+      <h2>Changes</h2>
+      <p>If this policy changes, the date above changes with it. Material changes will be noted on
+      the app's Marketplace listing.</p>
+
+      <h2>Contact</h2>
+      <p>Questions or privacy requests:
+      <a href="https://github.com/joesteinkamp/zoom-timer/issues">open an issue on GitHub</a>.</p>
+
+      <footer class="foot">
+        <a href="/docs/">Documentation</a> · <a href="/support/">Support</a> ·
+        <a href="/terms/">Terms of Use</a>
+      </footer>
+    </main>
+  </body>
+</html>

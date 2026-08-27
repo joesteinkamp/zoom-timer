@@ -4,6 +4,7 @@ const store = new Map<string, string>();
 (globalThis as any).localStorage = {
   getItem: (k: string) => store.get(k) ?? null,
   setItem: (k: string, v: string) => void store.set(k, v),
+  removeItem: (k: string) => void store.delete(k),
 };
 
 import { Timer, PREARM_LEAD_MS } from '../src/timer.ts';
@@ -82,6 +83,29 @@ t.reset();
 check('reset returns to idle', t.snapshot().state, 'idle');
 check('reset keeps lastDuration', t.snapshot().lastDurationMs, 1000);
 t.dispose();
+
+// ---- audio disclosure ----
+// Imported here rather than at the top: it reads storage as it loads, and
+// ESM evaluates every static import before the stub above exists.
+const consent = await import('../src/consent.ts');
+
+check('disclosure unanswered on a fresh install', consent.isAcknowledged(), false);
+consent.acknowledge();
+assert('disclosure sticks once answered', consent.isAcknowledged());
+check('answer is stored by version', store.get('zoom-timer:audio-disclosure'), consent.DISCLOSURE_VERSION);
+consent.forget();
+check('forget clears the answer', consent.isAcknowledged(), false);
+check('forget clears storage too', store.has('zoom-timer:audio-disclosure'), false);
+
+// A private window throws on write. The answer must still hold for the
+// session -- and be asked again next time, which is the safe way to fail.
+const workingSetItem = (globalThis as any).localStorage.setItem;
+(globalThis as any).localStorage.setItem = () => { throw new Error('blocked'); };
+consent.acknowledge();
+assert('answer holds for the session when storage is blocked', consent.isAcknowledged());
+check('nothing was written', store.has('zoom-timer:audio-disclosure'), false);
+(globalThis as any).localStorage.setItem = workingSetItem;
+consent.forget();
 
 console.log(failures === 0 ? '\nALL PASS' : `\n${failures} FAILURE(S)`);
 process.exit(failures === 0 ? 0 : 1);

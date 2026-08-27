@@ -18,7 +18,7 @@ export const config = { runtime: 'nodejs' };
 
 export default async function handler(request: Request): Promise<Response> {
   const settings = readConfig();
-  if (!settings) return problem('Server is missing Zoom OAuth environment variables.', 500);
+  if (!settings) return problem('Server is missing Zoom OAuth environment variables.', 500, false);
 
   const query = new URL(request.url).searchParams;
   const code = query.get('code');
