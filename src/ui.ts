@@ -213,7 +213,7 @@ function renderStatus(view: ViewModel): void {
       prompt.addEventListener('click', () => handlers?.onPromptShare());
       status.append(prompt);
     }
-  } else if (view.snapshot.state === 'idle' || view.snapshot.state === 'running') {
+  } else if (view.snapshot.state !== 'firing' && view.snapshot.state !== 'finished') {
     status.append(line(reachSummary(view), view.sharedAudioAvailable ? 'live' : undefined));
   }
 }

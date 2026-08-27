@@ -159,3 +159,32 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .link:hover { filter: brightness(1.15); }
 
 .spacer { flex: 1 1 auto; }
+
+/* Spike log. Kept in the stylesheet rather than a style attribute: the
+   Content-Security-Policy this app ships (style-src 'self') refuses inline
+   styles, so an inline attribute here renders unstyled inside Zoom. */
+.log {
+  font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre-wrap;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* Spike step cards. */
+.step { display: flex; gap: 12px; align-items: flex-start; }
+.step-n {
+  flex: 0 0 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.step-body { flex: 1 1 auto; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.step-body strong { font-weight: 600; font-size: 14px; }
+.q { font-size: 12.5px; color: var(--ink-soft); display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
+.q label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }

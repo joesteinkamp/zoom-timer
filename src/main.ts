@@ -167,9 +167,9 @@ async function teardown(runId: number): Promise<void> {
 
 function paint(): void {
   const snapshot = timer.snapshot();
-  const advisory = snapshot.state === 'idle' || snapshot.state === 'running'
-    ? share.foreseenProblem()
-    : null;
+  const advisory = snapshot.state === 'firing' || snapshot.state === 'finished'
+    ? null
+    : share.foreseenProblem();
 
   const view: ViewModel = {
     snapshot,

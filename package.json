@@ -10,13 +10,15 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --no-warnings test/logic.test.ts",
-    "check": "npm run typecheck && npm test"
+    "check": "npm run typecheck && npm test && npm run e2e",
+    "e2e": "npm run build && node test/e2e.mjs"
   },
   "dependencies": {
     "@zoom/appssdk": "^0.16.41"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
+    "playwright": "^1.62.1",
     "typescript": "^5.7.2",
     "vite": "^6.0.7"
   }

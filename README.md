@@ -109,36 +109,57 @@ Two Vercel defaults will cost you an afternoon if you miss them:
 
 ## The M0 experiment — do this first
 
-`/spike` is a standalone page for the one test that has to happen before the
-rest is worth trusting. Open it in a real meeting with a second participant:
+`/spike` is a guided two-step protocol for the one test that cannot be
+automated. Open it **inside the Zoom client**, in a real meeting, with a
+second participant on the call:
 
-1. **Does the tone reach the meeting at all?** Ask them what they heard.
-2. **Does its loudness track your system volume?** Play at full volume, have
-   them report the level, then drop to ~10% and play again.
+1. **Play at your normal system volume.** Mark whether they heard it.
+2. **Drop your system volume to ~10% and play again.** Mark whether it was
+   noticeably quieter for them.
 
-If (2) is true, no amount of mastering fixes it and it becomes a documented
-limitation rather than a bug to chase. It cannot be determined from the docs.
+The page prints a result block — client version, running context, whether the
+share opened and how fast, any refusal codes, and your two answers — ready to
+paste back.
 
-Still worth ten minutes: whether the host setting *"Multiple participants can
+Question 2 is the one that matters. If loudness in the meeting tracks the
+sharer's system volume, no amount of mastering fixes it, and it becomes a
+documented limitation rather than a bug to chase. It cannot be determined
+from the docs, and it changes what the app can promise.
+
+Also worth ten minutes: whether the host setting *"Multiple participants can
 share simultaneously"* lets an audio share coexist with someone else's screen
-share. If it does, that is a one-checkbox fix for the most common failure case.
+share. If it does, that is a one-checkbox fix for the most common failure
+case.
 
 ## Verification status
 
-Verified here:
-
 ```bash
-npm run check   # tsc --noEmit, then 33 logic assertions
-npm run build   # production bundle
+npm run check   # typecheck + logic tests + end-to-end browser run
 ```
 
-The tests cover duration parsing and formatting, the full state machine
-(start / pause / resume / extend / restart / reset / finish), and specifically
-that a stale `runId` cannot finish or tear down a current run.
+Three layers, all passing:
 
-**Not verified here, and unverifiable outside the Zoom client:** anything
-touching the SDK — audio share, the dynamic indicator, running-context
-detection, and the OAuth install round trip. Those need a real meeting.
+- **`npm run typecheck`** — `tsc --noEmit`.
+- **`npm test`** — 33 assertions over duration parsing and the full state
+  machine (start / pause / resume / extend / restart / reset / finish),
+  including specifically that a stale `runId` cannot finish or tear down a
+  current run.
+- **`npm run e2e`** — serves the production bundle with the *exact* headers
+  from `vercel.json` and drives the app in Chromium: a real 3-second timer
+  through running → paused → firing → finished, then Restart, then starting a
+  different duration straight from finished. It decodes the chime in a real
+  browser and fails on any console error, CSP violation, or failed request.
+
+  Serving the real headers is the point. This is what caught an inline `style`
+  attribute that our own `style-src 'self'` refuses — it would have rendered
+  the spike page unstyled inside Zoom and looked like anything but a CSP
+  problem. Set `SHOTS=./shots` to also write screenshots.
+
+**Not verified here, and unverifiable outside the Zoom client:** everything
+that touches the SDK — audio share, the dynamic indicator, running-context
+detection, and the OAuth install round trip. `zoomSdk.config()` needs the
+client's JS bridge, `shareComputerAudio` needs a live meeting, and the volume
+question needs a human on the other end. That is what M0 is for.
 
 ## Chime
 
